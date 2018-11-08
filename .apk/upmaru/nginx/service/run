@@ -1,0 +1,5 @@
+#!/bin/sh
+
+command=/usr/sbin/nginx
+
+source config_nginx && exec ${command} -c /etc/nginx/nginx.conf -g 'daemon off;'

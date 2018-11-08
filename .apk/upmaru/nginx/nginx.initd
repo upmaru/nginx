@@ -1,0 +1,35 @@
+#!/sbin/openrc-run
+
+name='nginx'
+description="Nginx http and reverse proxy server"
+extra_started_commands="reload reopen"
+supervisor="s6"
+s6_service_path="${RC_SVCDIR}/s6-scan/${name}"
+
+cfgfile=${cfgfile:-/etc/nginx/nginx.conf}
+pidfile=/run/nginx/nginx.pid
+required_files="$cfgfile"
+
+depend() {
+  need net s6-svscan
+  use dns logger netmount
+}
+
+start_pre() {
+  checkpath --directory --owner nginx:nginx ${pidfile%/*}
+  if [ ! -L "${RC_SVCDIR}/s6-scan/${name}" ]; then
+    ln -s "/etc/${name}/service" "${RC_SVCDIR}/s6-scan/${name}"
+  fi
+}
+
+reload() {
+  ebegin "Reloading $RC_SVCNAME configuration"
+  s6-svc -h ${s6_service_path}
+  eend $?
+}
+
+reopen() {
+  ebegin "Reopening $RC_SVCNAME log files"
+  s6-svc -1 ${s6_service_path}
+  eend $?
+}

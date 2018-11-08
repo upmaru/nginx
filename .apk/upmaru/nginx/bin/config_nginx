@@ -1,0 +1,7 @@
+#!/bin/sh
+
+keys="B2_ENDPOINT CDN_HOST STUDIO_ENDPOINT"
+
+for k in ${keys}; do
+  export ${k}=$(curl -s --unix-socket /dev/lxd/sock x/1.0/config/user.${k});
+done

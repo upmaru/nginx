@@ -1,0 +1,31 @@
+
+stages:
+  - build
+
+variables:
+  DATABASE_POSTGRESQL_USERNAME: postgres
+  REPODEST: /home/builder/packages/${CI_COMMIT_REF_NAME}
+  PACKAGE_DEST: /home/builder/packages/${CI_COMMIT_REF_NAME}/${CI_PROJECT_NAMESPACE}/
+  GCS_DEST: gs://packages.apk.build/${CI_COMMIT_REF_NAME}/${CI_PROJECT_NAMESPACE}/
+  GIT_STRATEGY: fetch
+
+build:
+  tags:
+    - gcp
+    - apk
+  stage: build
+  only:
+    refs:
+      - master
+      - develop
+    changes:
+      - .apk/upmaru/nginx/*
+  script:
+    - "rm -rf ${PACKAGE_DEST}"
+    - "mkdir -p ${PACKAGE_DEST}"
+    - "gsutil -m rsync -r ${GCS_DEST} ${PACKAGE_DEST}"
+    - "cd .apk/${CI_PROJECT_NAMESPACE}/nginx"
+    - "abuild checksum"
+    - "abuild -r"
+    - "abuild cleanoldpkg"
+    - "gsutil -m rsync -r -d ${PACKAGE_DEST} ${GCS_DEST}"
