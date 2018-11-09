@@ -18,8 +18,6 @@ build:
     refs:
       - master
       - develop
-    changes:
-      - .apk/upmaru/nginx/*
   script:
     - "rm -rf ${PACKAGE_DEST}"
     - "mkdir -p ${PACKAGE_DEST}"
